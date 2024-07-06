@@ -1,4 +1,4 @@
-# Готовность: 30%. Покрытие тестами: 0%
+# Готовность: 30%. Покрытие тестами: 0%. Затрачено времени: 5ч
 ![image](https://github.com/xWSWx/FastReportsHeadHunterTests/assets/29701338/754ae65f-6e8e-452e-918c-c7b1e2620713)
 
 
