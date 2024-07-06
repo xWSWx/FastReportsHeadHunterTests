@@ -10,27 +10,21 @@ namespace FastReportsTests.Shapes
     {
         public int Radius { get; set; }
         public override void Draw(Graphics g)
-        {
-            //using (Brush brush = new SolidBrush(FillColor))
-            {
-                g.FillEllipse(fillBrush, X, Y, 2 * Radius, 2 * Radius);
-            }
-            using (Pen pen = new Pen(StrokeColor))
-            {
-                g.DrawEllipse(pen, X, Y, 2 * Radius, 2 * Radius);
-            }
+        {                     
+            g.FillEllipse(fillBrush, X-Radius, Y - Radius, 2 * Radius, 2 * Radius);                              
+            g.DrawEllipse(strokePen, X- Radius, Y- Radius, 2 * Radius, 2 * Radius);         
         }
 
         public override bool IsPointInside(Point p)
         {
-            int dx = p.X - Radius;
-            int dy = p.Y - Radius;
+            int dx = X - p.X;
+            int dy = Y - p.Y;
             return (dx * dx + dy * dy <= Radius * Radius);
         }
 
         public override void Resize(int width, int height)
         {
-            Radius = width / 2;  // Assuming width = height for a circle
+            Radius = width / 2;  
         }
     }
 

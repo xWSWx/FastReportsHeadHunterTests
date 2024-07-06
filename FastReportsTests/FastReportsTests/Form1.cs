@@ -20,7 +20,7 @@ namespace FastReportsTests
                         DrawingPanelWSW.SetFuturePrimitive(new Shapes.TrianglePrimitive() { FillColor = Color.Yellow });
                         break;
                     case eDrawingPanelMode.drawRectangle:
-
+                        DrawingPanelWSW.SetFuturePrimitive(new Shapes.RectanglePrimitive() { Width = 50, Height = 30, FillColor = Color.Yellow });
                         break;
                 }
                 _currentDrawingMode = value;
@@ -29,6 +29,7 @@ namespace FastReportsTests
         public Form1()
         {
             InitializeComponent();
+            DrawingPanelWSW.OnAddPrimitiveByClick += (x, y) => listBox1.SelectedIndex = 0;
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)

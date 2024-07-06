@@ -20,12 +20,18 @@ namespace FastReportsTests.Shapes
         ///////////////////
         //// Рамочка
         private Color _strokeColor = _defaultStrokeColor;
-        public Color StrokeColor { get => _strokeColor; set { _strokeColor = value; strokeBrush = new SolidBrush(_strokeColor);  } }
-        protected Brush strokeBrush = new SolidBrush(_defaultStrokeColor);
+        public Color StrokeColor { get => _strokeColor; set { _strokeColor = value; strokePen = new Pen(_strokeColor);  } }
+        protected Pen strokePen = new Pen(_defaultStrokeColor);
 
         public int Width { get; set; }
         public int Height { get; set; }
+        /// <summary>
+        /// Пока что это центр X
+        /// </summary>
         public int X { get; set; }
+        /// <summary>
+        /// Пока что это центр Y
+        /// </summary>
         public int Y { get; set; }
         public abstract void Draw(Graphics g);
         public abstract bool IsPointInside(Point p);

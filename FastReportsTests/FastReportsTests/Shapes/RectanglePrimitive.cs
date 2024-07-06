@@ -8,21 +8,20 @@ namespace FastReportsTests.Shapes
 {
     public class RectanglePrimitive : GraphicPrimitive
     {
+        public RectanglePrimitive() { }
+
         public override void Draw(Graphics g)
-        {
-            using (Brush brush = new SolidBrush(FillColor))
-            {
-                g.FillRectangle(brush, X, Y, Width, Height);
-            }
-            using (Pen pen = new Pen(StrokeColor))
-            {
-                g.DrawRectangle(pen, X, Y, Width, Height);
-            }
+        {            
+            g.FillRectangle(fillBrush, X-Width/2, Y-Height/2, Width, Height);
+            g.DrawRectangle(strokePen, X-Width/2, Y-Height/2, Width, Height);
         }
 
         public override bool IsPointInside(Point p)
         {
-            return (p.X >= X && p.X <= Width && p.Y >= X && p.Y <= Height);
+            return
+                p.X >= X - Width/2 && p.X <= X + Width/2
+                && 
+                p.Y >= Y - Height/2 && p.Y <= Y+ Height/2;
         }
 
         public override void Resize(int width, int height)

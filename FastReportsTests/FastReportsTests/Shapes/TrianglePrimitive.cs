@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace FastReportsTests.Shapes
 {
     public class TrianglePrimitive : GraphicPrimitive
-    {
+    {        
         public int Angle { get; set; }
 
         public override void Draw(Graphics g)
