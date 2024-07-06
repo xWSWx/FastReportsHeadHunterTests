@@ -11,10 +11,15 @@ namespace FastReportsTests.WinFormComponents
     {
         public EventHandler? OnAddPrimitiveByClick;
         public EventHandler<GraphicPrimitive?>? OnSelectedChanged;
+        public EventHandler? OnConnected;
+        public EventHandler? OnTimerSelected;
         private List<GraphicPrimitive> primitives = new List<GraphicPrimitive>();
+        private List<GraphicPrimitive> connectionLines = new List<GraphicPrimitive>();
         private GraphicPrimitive? futurePrimitive;
         private GraphicPrimitive? _selectedPrimitive;
-        System.Windows.Forms.Timer SelectStrokeTimer = new ();
+        DummyPrimitive dummyPrimitive = new DummyPrimitive();
+        private readonly ConnectedLinePrimitive _currentConnectedLinePrimitive; 
+        System.Windows.Forms.Timer SelectStrokeTimer = new() { Interval=250 };
         public GraphicPrimitive? SelectedPrimitive 
         { 
             get => _selectedPrimitive; 
@@ -29,6 +34,20 @@ namespace FastReportsTests.WinFormComponents
                 if (_selectedPrimitive != null)
                 {                   
                     _selectedPrimitive.StrokeColor = savedSelectedPen.Color;
+                }
+
+                if (_selectedPrimitive != null && value != null && isConnectionLineInProgress)
+                {
+                    _currentConnectedLinePrimitive.Second = value;
+                    connectionLines.Add(new ConnectedLinePrimitive(_currentConnectedLinePrimitive.First, _currentConnectedLinePrimitive.Second));
+                    isConnectionLineInProgress = false;
+                    _currentConnectedLinePrimitive.First = dummyPrimitive;
+                    _currentConnectedLinePrimitive.Second = dummyPrimitive;
+                    OnConnected?.Invoke(this, EventArgs.Empty);
+                }
+                if (_selectedPrimitive == null && value != null && isConnectionLineInProgress)
+                {
+                    _currentConnectedLinePrimitive.First = value;
                 }
 
                 _selectedPrimitive = value;
@@ -61,10 +80,11 @@ namespace FastReportsTests.WinFormComponents
         
         Pen selectedPen = new Pen (Color.FromArgb(127, 255, 212));
         Pen savedSelectedPen = new Pen(Color.White);
+        
         public DrawingPanel() 
         {
             DoubleBuffered = true;
-
+            _currentConnectedLinePrimitive = new ConnectedLinePrimitive(dummyPrimitive, dummyPrimitive);
             //TODO: сделдать красоту
             SelectStrokeTimer.Tick += delegate {
                 if (SelectedPrimitive == null)
@@ -75,6 +95,7 @@ namespace FastReportsTests.WinFormComponents
                 else
                     SelectedPrimitive.StrokeColor = savedSelectedPen.Color;
 
+                OnTimerSelected?.Invoke(null, EventArgs.Empty);
                 Invalidate();
             };
 
@@ -93,6 +114,12 @@ namespace FastReportsTests.WinFormComponents
             {
                 primitive.Draw(e.Graphics);
             }
+            foreach (var connectLine in connectionLines)
+            {
+                connectLine.Draw(e.Graphics);
+            }
+            if (isConnectionLineInProgress)
+                _currentConnectedLinePrimitive.Draw(e.Graphics);
             futurePrimitive?.Draw(e.Graphics);
         }
 
@@ -106,6 +133,17 @@ namespace FastReportsTests.WinFormComponents
         {
             futurePrimitive = primitive;
         }
+        bool isConnectionLineInProgress = false;
+        public void StartConnectionLinePrimitive()
+        {
+            if (SelectedPrimitive != null)
+            {
+                _currentConnectedLinePrimitive.First = SelectedPrimitive;
+                _currentConnectedLinePrimitive.Second  = dummyPrimitive;
+            }
+            isConnectionLineInProgress = true;
+        }
+        public void StopConnectionLinePrimitive() => isConnectionLineInProgress = false;
 
         private void DrawingPanel_MouseMove(object sender, MouseEventArgs e)
         {
@@ -123,6 +161,23 @@ namespace FastReportsTests.WinFormComponents
                 SelectedPrimitive.Y = e.Y; 
                 Invalidate();
                 return;
+            }
+
+            if (isConnectionLineInProgress)
+            {
+                if (SelectedPrimitive == null)
+                    return;
+                dummyPrimitive.X = e.X;
+                dummyPrimitive.Y = e.Y;
+                Invalidate();
+                return;
+            }
+            if (isResizing && SelectedPrimitive != null)
+            {
+                int dx = e.X - startMousePosition.X;
+                int dy = e.Y - startMousePosition.Y;
+                SelectedPrimitive.Resize(startWidth + dx, startHeight + dy);
+                Invalidate();
             }
 
         }
@@ -162,9 +217,7 @@ namespace FastReportsTests.WinFormComponents
             if (e.Button == MouseButtons.Left)
                 isMoving = false;
             else if (e.Button == MouseButtons.Right)
-                isResizing = false;
-            
-            //throw new NotImplementedException();
+                isResizing = false;           
         }
         private void DrawingPanel_MouseClick(object? sender, MouseEventArgs e)
         {

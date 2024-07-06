@@ -1,4 +1,6 @@
+using FastReportsTests.Shapes;
 using FastReportsTests.WinFormComponents;
+using System.Runtime.CompilerServices;
 
 namespace FastReportsTests
 {
@@ -11,6 +13,11 @@ namespace FastReportsTests
             get { return _currentDrawingMode; }
             private set
             {
+                var wasConnectMode = _currentDrawingMode == eDrawingPanelMode.connect;
+                if (value != eDrawingPanelMode.connect)
+                {
+                    DrawingPanelWSW.StopConnectionLinePrimitive();
+                }
                 switch (value)
                 {
                     case eDrawingPanelMode.drawCicle:
@@ -22,6 +29,9 @@ namespace FastReportsTests
                     case eDrawingPanelMode.drawRectangle:
                         DrawingPanelWSW.SetFuturePrimitive(new Shapes.RectanglePrimitive() { Width = 50, Height = 30, FillColor = Color.Yellow });
                         break;
+                    case eDrawingPanelMode.connect:
+                        DrawingPanelWSW.StartConnectionLinePrimitive();
+                        break;
                 }
                 _currentDrawingMode = value;
             }
@@ -29,9 +39,20 @@ namespace FastReportsTests
         public Form1()
         {
             InitializeComponent();
-            DrawingPanelWSW.OnAddPrimitiveByClick += (x, y) => listBox1.SelectedIndex = 0;
+            DrawingPanelWSW.OnAddPrimitiveByClick += (x, y) => listBox1.SelectedIndex = -1;
+            DrawingPanelWSW.OnConnected += (x, y) => listBox1.SelectedIndex = 0;
+            DrawingPanelWSW.OnSelectedChanged += DrawingPanelWSW_OnSelectChanged;
+            DrawingPanelWSW.OnTimerSelected += (x, y) => 
+            {
+                FillLabel.ForeColor = DrawingPanelWSW.SelectedPrimitive == null ? Color.Black : DrawingPanelWSW.SelectedPrimitive.FillColor;
+                StrokeLable.ForeColor = DrawingPanelWSW.SelectedPrimitive == null ? Color.Black : DrawingPanelWSW.SelectedPrimitive.StrokeColor;
+            };
         }
-
+        private void DrawingPanelWSW_OnSelectChanged(object? sender, GraphicPrimitive? shape)
+        {
+            FillLabel.ForeColor = shape == null? Color.Black : shape.FillColor;
+            StrokeLable.ForeColor = shape == null ? Color.Black : shape.StrokeColor;
+        }
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -41,9 +62,5 @@ namespace FastReportsTests
             catch { }
         }
 
-        private void DrawingPanelWSW_MouseMove(object sender, MouseEventArgs e)
-        {
-            
-        }
     }
 }
